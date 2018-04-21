@@ -1,0 +1,31 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>{{displayName}}</ion-title>
+  </ion-navbar>
+</ion-header>
+<ion-content  class="card-background-page">
+	<p>HOME Page</p>
+<!-- 	<div *ngFor="let item of items | async">
+    <h1>{{ item.product_name}}</h1>
+    <p>{{ item.product_cost}}</p>
+    <p>{{ item.id}}</p>
+		<img [src]="item.product_image" />
+	</div>	 -->
+<!-- 	<ul>
+    <li *ngFor="let shirt of shirts | async">
+      {{ shirt.product_name }} - {{ shirt.product_cost }}
+      {{ shirt.id }}
+    </li>
+  </ul> -->
+  <div *ngFor="let shirt of shirts | async">
+	  <img [src]="shirt.product_image" />
+	  <div class="card-wrapper">
+	    <ion-icon name="heart" (click)="addToFavorites(shirt.id)"></ion-icon>
+			<ion-icon name="cart" (click)="addToCar(shirt.id)"></ion-icon>
+			<div class="card-text">
+		   	<div class="card-title">{{ shirt.product_name }}</div>
+		    <div class="card-subtitle">{{ shirt.product_cost }}</div>
+			</div>
+	  </div>
+	</div>
+</ion-content>
