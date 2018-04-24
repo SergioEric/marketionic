@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams } from 'ionic-angular';
+import { NavController, NavParams, ToastController,AlertController,LoadingController } from 'ionic-angular';
 import {Observable} from 'rxjs/Observable'
 
 
@@ -8,6 +8,7 @@ import { AngularFireStorage } from 'angularfire2/storage';
 import { AngularFirestore,AngularFirestoreDocument } from 'angularfire2/firestore';
 
 import { Camera,CameraOptions } from '@ionic-native/camera';
+import { LoginPage } from '../login/login'
 
 
 @Component({
@@ -33,21 +34,37 @@ export class DashPage {
   constructor(
   	public navCtrl: NavController,
   	public navParams: NavParams,
+    public toast:ToastController,
+    public loadingCtrl:LoadingController,
+    public alertCtrl:AlertController,
   	private auth:AuthService,
     private storage:AngularFireStorage,
     private camera:Camera,
     private afs:AngularFirestore
   	) {
-  	this.getImageUrl();
+  	// this.getImageUrl();
+    if(!auth.authenticated()) navCtrl.setRoot(LoginPage)
+  }
+  showToast(msj:string){
+    this.toast.create({
+      message:msj,
+      position:"top",
+      duration:1500,
+    }).present()
   }
 
-  method(){
-  	// this.auth.
+  presentAlert(msj:string,subtitle:string) {
+    let alert = this.alertCtrl.create({
+      title: msj,
+      subTitle: subtitle,
+      buttons: ['Cerrar']
+    });
+    alert.present();
   }
-  getImageUrl(){
-    this.imageURL=  this.storage.ref('scotchs').getDownloadURL()
-    console.log(this.imageURL)
-  }
+  // getImageUrl(){
+  //   this.imageURL=  this.storage.ref('scotchs').getDownloadURL()
+  //   console.log(this.imageURL)
+  // }
 
   options: CameraOptions = {
     quality: 100,
@@ -74,7 +91,7 @@ export class DashPage {
       // this.getImageUrl()
       // console.log(new Date().getDay())
     }catch(e){
-      alert(e)
+      this.presentAlert("ups",e)
     }
   }
 
@@ -95,29 +112,36 @@ export class DashPage {
 			!this.product_name||
 			!this.product_cost||
 			!this.product_description ){
-			alert("campo vacio");
+			this.showToast("campo vacio");
   	}else{
   		if(this.URL_OK != true){
-  			alert("toma una foto o sube una desde la galeria");
+  			this.presentAlert("FOTO","toma una foto o sube una desde la galeria");
   		}else{
-			alert("todo bien")
 			const picture = this.storage.ref(`products-image/${this.generateTime()}`);
+      /*initilizated loading*/
+      let loading = this.loadingCtrl.create({
+        content: 'subiendo productos...'
+      });
+      loading.present();
       picture.putString(this.product_image_to_upload,'data_url').then(res=>{
       	this.imageURL = res.downloadURL
       	this.porcentaje =`${(res.bytesTransferred)/1024} KB`
-      	alert(this.imageURL)
+      	// alert(this.imageURL)
 	      this.afs.collection('products').add({
 	      	product_name: this.product_name,
 					product_cost: this.product_cost,
 					product_description: this.product_description,
 					product_image: this.imageURL
 	      }).then(doc=>{
-	      	alert("agregado a firebase")
+          loading.dismiss();
+	      	this.showToast("agregado a firebase")
 	      }).catch(error=>{
-	      	alert(`no se subio el P: ${error.message}`);
+          loading.dismiss();
+	      	this.presentAlert("no se subio el Producto",error.message);
 	      })
       },error=>{
-      	alert(`subiendoFoto: ${error.message}`)
+          loading.dismiss();
+          this.presentAlert("no se subio la foto",error.message);
       	return;
       });
   		}

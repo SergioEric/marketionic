@@ -6,6 +6,7 @@ import { AngularFireStorage } from 'angularfire2/storage';
 
 
 import { AuthService } from '../../services/AuthService';
+import { LoginPage } from '../login/login'
 
 @Component({
   selector: 'page-account',
@@ -26,8 +27,8 @@ export class AccountPage {
     private camera:Camera,
     private afs:AngularFireStorage
   	) {
-    this.image_data_url = auth.getUserPhotoURL();
-
+    if(!auth.authenticated()) navCtrl.setRoot(LoginPage)
+    else this.image_data_url = auth.getUserPhotoURL();
   }
   ionViewDidLoad() {
     console.log('ionViewDidLoad AccountPage');   
@@ -63,8 +64,6 @@ export class AccountPage {
       alert(e)
     }
   }  
-
-
 
   logout(){
   	this.auth.signOut();

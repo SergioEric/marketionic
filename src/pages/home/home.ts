@@ -3,7 +3,7 @@ import { NavController } from 'ionic-angular';
 
 
 // import { FcmProvider } from '../../providers/fcm/fcm';
-import { ToastController } from 'ionic-angular';
+import { ToastController,ModalController,LoadingController } from 'ionic-angular';
 import { Subject } from 'rxjs/Subject';
 import { tap } from 'rxjs/operators'
 
@@ -19,6 +19,8 @@ import 'rxjs/add/operator/map';
 import { AuthService } from '../../services/AuthService';
 
 // import { DashPage } from '../dash/dash';
+import { CartModalPage } from '../cart-modal/cart-modal';
+
 
 interface Items {
   product_name: number,
@@ -44,7 +46,7 @@ export class HomePage {
   private shirtCollection: AngularFirestoreCollection<Items>;
   shirts: Observable<ItemId[]>;
 
-  carList:string[]=[];
+  cartList:any[]=[];
 
   constructor(
     public navCtrl: NavController,
@@ -52,7 +54,10 @@ export class HomePage {
     private auth:AngularFireAuth,
     private authService:AuthService,
     public toastCtrl:ToastController,
-    public afs:AngularFirestore
+    public modalCtrl:ModalController,
+    public afs:AngularFirestore,
+    public toast:ToastController,
+    public loadingCtrl: LoadingController
   ) {
 
     // this.auth.auth.onAuthStateChanged(user => {
@@ -80,7 +85,20 @@ export class HomePage {
       })
     )
     .subscribe()*/
-    
+    let loading = loadingCtrl.create({
+      content: 'cargando productos...'
+    });
+    loading.present();
+
+    // setTimeout(() => {
+    //   alert("2 segundos");
+    // }, 1000);
+    this.loadProducts()
+    setTimeout(() => {
+
+      loading.dismiss();
+    }, 3000);
+
     if(this.authService.authState){
       
       this.displayName = this.authService.currentUserDisplayName();
@@ -105,10 +123,14 @@ export class HomePage {
   //     })
   // })
   // }
-  ionViewWillEnter() {
-    // this.itemsCollection = this.afs.collection('products'); //ref()
-    // this.items = this.itemsCollection.valueChanges()
-
+  showToast(msj:string){
+    this.toast.create({
+      message:msj,
+      position:"top",
+      duration:1500,
+    }).present();
+  }
+  loadProducts(){
    this.shirtCollection = this.afs.collection<Items>('products');
     this.shirts = this.shirtCollection.snapshotChanges().map(actions => {
       return actions.map(a => {
@@ -118,29 +140,80 @@ export class HomePage {
       });
     });
   }
-  addToFavorites(id:string){
-    console.log(`agregar a favoritos con id: ${id}`);
-    this.viewCarList();
+  ionViewWillEnter() {
+    // this.itemsCollection = this.afs.collection('products'); //ref()
+    // this.items = this.itemsCollection.valueChanges()
   }
-  addToCar(id:string){
+  goToPay(){
+
+  }
+  addToFavorites(id:string){
+    if(this.authService.authState){//si esta logueado
+      let exist=false;
+      // this.afs.collection(`users_like`).doc(this.authService.currentUserId()).snapshotChanges().map(actions=>{
+      this.afs.collection(`users_like/${this.authService.currentUserId()}/${id}`).auditTrail().map(actions=>{
+        console.log(`fase 1`);
+        return actions.map(a=>{
+          console.log(`fase 2`);
+          const data = a.payload.doc.data();
+          const id = a.payload.doc.id;
+          if(data.like){
+            console.log(`fase 3`);
+            exist = true
+          }
+          return { id, ...data };
+        })
+      });  
+     
+      if(!exist){
+        // no existe
+        console.log(`NO existe favorito con id: ${id}`);
+        let new_id = this.afs.createId();
+        this.afs.collection(`users_like/${this.authService.currentUserId()}/${id}`).add({
+          like:true
+        })
+      console.log(`agregar a favoritos con id: ${id}`);
+      this.viewCarList();
+      }
+    }
+  }
+  addToCar(product:ItemId){
     let exist= false;
-    if(this.carList.length == 0) {this.carList.push(id); return;}
-    this.carList.map(v=>{
-      debugger;
-        if(v==id){
+
+    if(this.cartList.length == 0) { return this.showModalCart(product);}
+    console.log(`PRODUCTO ${product.product_name}`);
+
+    this.cartList.map((prod)=>{
+      // debugger;
+        if(prod.p.id==product.id){
           exist = true;
+          this.showToast("YA ESTA EN CARRITO")
+          console.log("YA ESTA EN CART");
           return;
         }
     })
     if(!exist){
-      this.carList.push(id);
-      console.log(`agregar al carrito ${id}`);
+      this.showModalCart(product);
     }
+    console.log(this.cartList);
+  }
+  showModalCart(product:ItemId){
+    let modal = this.modalCtrl.create(CartModalPage,  { product: product });
+    modal.onDidDismiss(data=>{
+      console.log(data);
+      // debugger;
+      if(data.quantity>0){
+        let new_product = {p:product,amount:data.quantity}
+        this.cartList.push(new_product);
+        console.log(`agregar al carrito ${product.product_name}`);
+      }
+      console.log(this.cartList);    })
+    modal.present();
   }
   viewCarList(){
-    let ids='';
-    if(this.carList.length == 0) return;
-    this.carList.map(v=>{
+    let ids=''; //ids of products
+    if(this.cartList.length == 0) return;
+    this.cartList.map(v=>{
       // debugger;
       ids+=`${v} \n`;
     })

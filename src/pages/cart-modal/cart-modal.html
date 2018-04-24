@@ -1,0 +1,21 @@
+<!-- <ion-header>
+
+  <ion-navbar>
+    <ion-title>cart-modal</ion-title>
+  </ion-navbar>
+
+</ion-header> -->
+
+
+<ion-content padding>
+	<ion-icon name="close" (click)="dismiss()"> </ion-icon>
+	cart list
+	<ion-card *ngFor="let p of cartList">
+		<p>{{ p.product_name }}</p>
+		<p>{{ p.product_cost }}</p>
+		<p>{{ p.product_description }}</p>
+		<p>{{ p.product_image }}</p>
+	</ion-card>	
+	<ion-input type="number" placeholder="cantidad" [(ngModel)]="quantity"></ion-input>
+	<button ion-button color="light" (click)="dismiss()">Agregar</button>
+</ion-content>

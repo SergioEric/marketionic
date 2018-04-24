@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from 'angularfire2/auth';
 import * as firebase from 'firebase';
+import { ToastController } from 'ionic-angular';
+
 
 
 @Injectable()
@@ -10,11 +12,19 @@ export class AuthService {
 
   constructor(
     private afAuth: AngularFireAuth,
+    public toast:ToastController
     ) {
       this.afAuth.authState.subscribe((auth) => {
         this.authState = auth
       });
     }
+ showToast(msj:string){
+    this.toast.create({
+      message:msj,
+      position:"top",
+      duration:3000,
+    }).present()
+  }
 
   // Returns true if user is logged in
   authenticated(): boolean {
@@ -104,12 +114,12 @@ export class AuthService {
   }
 
   emailLogin(email:string, password:string) {
-     return this.afAuth.auth.signInWithEmailAndPassword(email, password)
+     this.afAuth.auth.signInWithEmailAndPassword(email, password)
        .then((user) => {
          this.authState = user
          // this.updateUserData()
        })
-       .catch(error => console.log(error.message));
+       .catch(error => this.showToast(error.message));
   }
 
   // Sends email allowing user to reset password
@@ -146,10 +156,10 @@ export class AuthService {
         photoURL:url
     }).then(res=>{
       // alert(`Perfil actualizado ${res.displayName}`)
-      alert("se actualizo el perfil")
+      this.showToast("se actualizo el perfil")
       console.log(res)
     }).catch(error=>{
-      alert(`No se pudo actualizar el perfil ${error.message}`);
+      this.showToast(`No se pudo actualizar el perfil ${error.message}`);
     })
 
   }
