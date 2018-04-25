@@ -2,7 +2,9 @@ import { Injectable } from '@angular/core';
 import { AngularFireAuth } from 'angularfire2/auth';
 import * as firebase from 'firebase';
 import { ToastController } from 'ionic-angular';
+import { Storage } from '@ionic/storage';
 
+import { HomePage } from '../pages/home/home';
 
 
 @Injectable()
@@ -12,7 +14,8 @@ export class AuthService {
 
   constructor(
     private afAuth: AngularFireAuth,
-    public toast:ToastController
+    public toast:ToastController,
+    private storage:Storage,
     ) {
       this.afAuth.authState.subscribe((auth) => {
         this.authState = auth
@@ -135,6 +138,8 @@ export class AuthService {
   //// Sign Out ////
   signOut(): void {
     this.afAuth.auth.signOut();
+    this.storage.remove('username');
+    // this.navCtrl.setRoot(HomePage)
   }
 
 

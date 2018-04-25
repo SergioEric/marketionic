@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { NavController } from 'ionic-angular';
-
+import { NavController,MenuController } from 'ionic-angular';
+import { Storage } from '@ionic/storage';
 
 // import { FcmProvider } from '../../providers/fcm/fcm';
 import { ToastController,ModalController,LoadingController } from 'ionic-angular';
@@ -20,6 +20,8 @@ import { AuthService } from '../../services/AuthService';
 
 // import { DashPage } from '../dash/dash';
 import { CartModalPage } from '../cart-modal/cart-modal';
+import { CardModalPage } from '../card-modal/card-modal';
+
 
 
 interface Items {
@@ -43,13 +45,16 @@ export class HomePage {
   itemsCollection: AngularFirestoreCollection<Items>; //Firestore collection
   items: Observable<Items[]>; // read collection
 
-  private shirtCollection: AngularFirestoreCollection<Items>;
-  shirts: Observable<ItemId[]>;
+  private productCollection: AngularFirestoreCollection<Items>;
+  products: Observable<ItemId[]>;
 
   cartList:any[]=[];
+  SearchBar:boolean=false;
 
   constructor(
     public navCtrl: NavController,
+    public menu:MenuController,
+    private storage:Storage,
     // private fcm:FcmProvider,
     private auth:AngularFireAuth,
     private authService:AuthService,
@@ -59,6 +64,7 @@ export class HomePage {
     public toast:ToastController,
     public loadingCtrl: LoadingController
   ) {
+     menu.enable(true);
 
     // this.auth.auth.onAuthStateChanged(user => {
     //   if (user) {
@@ -85,27 +91,37 @@ export class HomePage {
       })
     )
     .subscribe()*/
-    let loading = loadingCtrl.create({
-      content: 'cargando productos...'
-    });
-    loading.present();
+    // let loading = loadingCtrl.create({
+    //   content: 'cargando productos...'
+    // });
+    // loading.present();
 
-    // setTimeout(() => {
-    //   alert("2 segundos");
-    // }, 1000);
     this.loadProducts()
-    setTimeout(() => {
+    // setTimeout(() => {
 
-      loading.dismiss();
-    }, 3000);
+    //   loading.dismiss();
+    // }, 3000);
+      storage.get('username').then(val=>{
+        if(val){
+          debugger;
+          this.displayName = val
+        }else{
+          if(this.authService.authState){
+            this.displayName = this.authService.currentUserDisplayName();
+            storage.set('username',this.displayName);
+          }else{
+            this.displayName = "Inicia sesion"
+          }
+        }
+      }).catch(e=>{
+          this.showToast(`Can't get username : ${e}`)
+      });
 
-    if(this.authService.authState){
-      
-      this.displayName = this.authService.currentUserDisplayName();
-    }else{
-      this.displayName = "Inicia sesion"
-    }
-
+      storage.get('cartlist').then(val=>{
+        if(val){
+          this.cartList = val;
+        }
+      })
   }
 
   //  getProducts(){
@@ -131,8 +147,8 @@ export class HomePage {
     }).present();
   }
   loadProducts(){
-   this.shirtCollection = this.afs.collection<Items>('products');
-    this.shirts = this.shirtCollection.snapshotChanges().map(actions => {
+   this.productCollection = this.afs.collection<Items>('products');
+    this.products = this.productCollection.snapshotChanges().map(actions => {
       return actions.map(a => {
         const data = a.payload.doc.data() as Items;
         const id = a.payload.doc.id;
@@ -145,7 +161,19 @@ export class HomePage {
     // this.items = this.itemsCollection.valueChanges()
   }
   goToPay(){
-
+    let modal = this.modalCtrl.create(CardModalPage,{ data: this.cartList });
+    modal.onDidDismiss(data=>{
+      console.log(data);
+      // debugger;
+      if(data.delete){
+        this.cartList = []
+        this.storage.remove('cartlist');
+        // let new_product = {p:product,amount:data.quantity}
+        // this.cartList.push(new_product);
+        // console.log(`agregar al carrito ${product.product_name}`);
+      }
+    })
+    modal.present();
   }
   addToFavorites(id:string){
     if(this.authService.authState){//si esta logueado
@@ -205,6 +233,7 @@ export class HomePage {
       if(data.quantity>0){
         let new_product = {p:product,amount:data.quantity}
         this.cartList.push(new_product);
+        this.storage.set('cartlist',this.cartList);
         console.log(`agregar al carrito ${product.product_name}`);
       }
       console.log(this.cartList);    })
@@ -218,5 +247,14 @@ export class HomePage {
       ids+=`${v} \n`;
     })
     alert(ids)
+  }
+  getItems(ev:any){
+    let val = ev.target.value;
+     if (val && val.trim() != ''){
+        // this.products = this.products.filter();
+     }
+  }
+  showSearchBar(){
+    this.SearchBar = !this.SearchBar
   }
 }

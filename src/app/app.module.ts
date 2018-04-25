@@ -3,6 +3,8 @@ import { ErrorHandler, NgModule } from '@angular/core';
 import { IonicApp, IonicErrorHandler, IonicModule } from 'ionic-angular';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { StatusBar } from '@ionic-native/status-bar';
+import { IonicStorageModule } from '@ionic/storage';
+
 
 import { MyApp } from './app.component';
 import { HomePage } from '../pages/home/home';
@@ -10,6 +12,7 @@ import { DashPage } from '../pages/dash/dash';
 import { LoginPage } from '../pages/login/login';
 import { AccountPage } from '../pages/account/account';
 import { CartModalPage } from '../pages/cart-modal/cart-modal';
+import { CardModalPage } from '../pages/card-modal/card-modal';
 
 
 import { Firebase } from '@ionic-native/firebase';
@@ -41,13 +44,16 @@ let config = {
     DashPage,
     LoginPage,
     AccountPage,
-    CartModalPage
+    CartModalPage,
+    CardModalPage
   ],
   imports: [
     BrowserModule,
     IonicModule.forRoot(MyApp),
     AngularFireModule.initializeApp(config),
     AngularFirestoreModule.enablePersistence(),
+    IonicStorageModule.forRoot({ name: '__mydb',
+         driverOrder: ['indexeddb', 'sqlite', 'websql']}),
     AngularFirestoreModule,
     AngularFireStorageModule,
     AngularFireAuthModule 
@@ -59,7 +65,8 @@ let config = {
     DashPage,
     LoginPage,
     AccountPage,
-    CartModalPage
+    CartModalPage,
+    CardModalPage
   ],
   providers: [
     StatusBar,

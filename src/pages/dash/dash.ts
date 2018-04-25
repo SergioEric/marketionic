@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams, ToastController,AlertController,LoadingController } from 'ionic-angular';
+import { NavController, NavParams, ToastController,AlertController,LoadingController,MenuController } from 'ionic-angular';
 import {Observable} from 'rxjs/Observable'
 
 
@@ -34,6 +34,7 @@ export class DashPage {
   constructor(
   	public navCtrl: NavController,
   	public navParams: NavParams,
+    public menu:MenuController,
     public toast:ToastController,
     public loadingCtrl:LoadingController,
     public alertCtrl:AlertController,
@@ -42,6 +43,7 @@ export class DashPage {
     private camera:Camera,
     private afs:AngularFirestore
   	) {
+    menu.enable(true)
   	// this.getImageUrl();
     if(!auth.authenticated()) navCtrl.setRoot(LoginPage)
   }

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams } from 'ionic-angular';
+import { NavController, NavParams, MenuController } from 'ionic-angular';
 
 import { Camera,CameraOptions } from '@ionic-native/camera';
 import { AngularFireStorage } from 'angularfire2/storage';
@@ -7,6 +7,7 @@ import { AngularFireStorage } from 'angularfire2/storage';
 
 import { AuthService } from '../../services/AuthService';
 import { LoginPage } from '../login/login'
+import { HomePage } from '../home/home'
 
 @Component({
   selector: 'page-account',
@@ -23,10 +24,12 @@ export class AccountPage {
   constructor(
   	public navCtrl: NavController, 
   	public navParams: NavParams,
+    public menu:MenuController,
   	private auth:AuthService,
     private camera:Camera,
     private afs:AngularFireStorage
   	) {
+    menu.enable(true)
     if(!auth.authenticated()) navCtrl.setRoot(LoginPage)
     else this.image_data_url = auth.getUserPhotoURL();
   }
@@ -67,5 +70,6 @@ export class AccountPage {
 
   logout(){
   	this.auth.signOut();
+    this.navCtrl.setRoot(HomePage)
   }
 }
