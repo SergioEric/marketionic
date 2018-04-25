@@ -113,7 +113,7 @@ export class AuthService {
         // this.updateUserData()
          console.log("user created")
       })
-      .catch(error => console.log(error.message));
+      .catch(error =>this.showToast(error.message));
   }
 
   emailLogin(email:string, password:string) {
@@ -144,7 +144,7 @@ export class AuthService {
 
 
   //// Helpers ////
-  updateUserData(name:string,url:string): void {
+  updateUserData(name,url): void {
   // Writes user name and email to realtime db
   // useful if your app displays information about users or for admin features
     // let path = `users/${this.currentUserId}`; // Endpoint on firebase
@@ -155,21 +155,19 @@ export class AuthService {
 
     // this.db.object(path).update(data)
     // .catch(error => console.log(error));
-    this.afAuth.auth.currentUser.updateProfile(
-      {
-        displayName:name,
-        photoURL:url
-    }).then(res=>{
-      // alert(`Perfil actualizado ${res.displayName}`)
-      this.showToast("se actualizo el perfil")
-      console.log(res)
-    }).catch(error=>{
-      this.showToast(`No se pudo actualizar el perfil ${error.message}`);
-    })
-
-  }
-
-
-
-
+ 
+      this.afAuth.auth.currentUser.updateProfile(
+        {
+          displayName:name,
+          photoURL:url
+      }).then(res=>{
+        // alert(`Perfil actualizado ${res.displayName}`)
+        this.showToast("se actualizo el perfil")
+        this.storage.remove('username');
+        this.storage.set('username', name);
+        console.log(res)
+      }).catch(error=>{
+        this.showToast(`No se pudo actualizar el perfil ${error.message}`);
+      })
+    }
 }

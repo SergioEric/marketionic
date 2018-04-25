@@ -3,6 +3,7 @@ import { NavController, NavParams, MenuController } from 'ionic-angular';
 
 import { Camera,CameraOptions } from '@ionic-native/camera';
 import { AngularFireStorage } from 'angularfire2/storage';
+import { Storage } from '@ionic/storage';
 
 
 import { AuthService } from '../../services/AuthService';
@@ -15,10 +16,10 @@ import { HomePage } from '../home/home'
 })
 export class AccountPage {
 
-  name:string;
+  name:string="";
   photo_url:string;
   image_data_url:string;
-
+  username:string;
   showEdit:boolean=false;
 
   constructor(
@@ -27,11 +28,15 @@ export class AccountPage {
     public menu:MenuController,
   	private auth:AuthService,
     private camera:Camera,
-    private afs:AngularFireStorage
+    private afs:AngularFireStorage,
+    private storage:Storage
   	) {
     menu.enable(true)
     if(!auth.authenticated()) navCtrl.setRoot(LoginPage)
     else this.image_data_url = auth.getUserPhotoURL();
+    storage.get('username').then(val=>{
+      this.username = val;
+    });
   }
   ionViewDidLoad() {
     console.log('ionViewDidLoad AccountPage');   
@@ -58,7 +63,7 @@ export class AccountPage {
       const picture = this.afs.ref(`user_profile_photos/${this.auth.currentUserId()}`);
       picture.putString(data_img,'data_url').then(res=>{
         this.image_data_url = res.downloadURL;
-        this.auth.updateUserData(this.name,res.downloadURL);
+        this.auth.updateUserData(this.username,res.downloadURL);
       }).catch(e=>{
         alert(`No se pudo subir la foto: ${e.message}`)
       })
@@ -66,6 +71,12 @@ export class AccountPage {
     }catch(e){
       alert(e)
     }
+  }
+  changeInfo(){
+    if(this.name.trim() != "")
+      {
+        debugger;
+        this.auth.updateUserData(this.name,this.image_data_url);}
   }  
 
   logout(){

@@ -6,6 +6,7 @@ import { AngularFireAuth } from 'angularfire2/auth';
 
 import { DashPage } from '../dash/dash';
 import { HomePage } from '../home/home';
+import { RegisterPage } from '../register/register';
 
 
 @Component({
@@ -58,8 +59,7 @@ export class LoginPage {
     // alert(`${this.email}- ${this.password}`)
   }
   handleRegister(){
-    if(this.email.trim() == "" || this.password.trim()==""){ return;}
-    this.authService.emailSignUp(this.email,this.password);
+    this.navCtrl.push(RegisterPage)
   }
 
 }

@@ -122,7 +122,7 @@ export class DashPage {
 			const picture = this.storage.ref(`products-image/${this.generateTime()}`);
       /*initilizated loading*/
       let loading = this.loadingCtrl.create({
-        content: 'subiendo productos...'
+        content: 'subiendo producto...'
       });
       loading.present();
       picture.putString(this.product_image_to_upload,'data_url').then(res=>{

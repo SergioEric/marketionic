@@ -10,7 +10,7 @@
     <button ion-button menuToggle icon-only>
       <ion-icon name='menu'></ion-icon>
     </button>
-    <ion-title>Login</ion-title>
+    <ion-title>Registro</ion-title>
   </ion-navbar>
 
 </ion-header>
@@ -26,7 +26,6 @@
 			<ion-label color="primary">Password</ion-label>
   		<ion-input placeholder="min 6 char" type="password" [(ngModel)]="password"></ion-input>
 		</ion-item>
-		<button (click)="handleLogin()" ion-button full color="primary">Login</button>
-		<button (click)="handleRegister()" ion-button full outline color="my_blue">Register</button>
+		<button (click)="handleRegister()" ion-button full color="my_blue">Register</button>
 	</ion-list>
 </ion-content>

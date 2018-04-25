@@ -10,6 +10,7 @@ import { MyApp } from './app.component';
 import { HomePage } from '../pages/home/home';
 import { DashPage } from '../pages/dash/dash';
 import { LoginPage } from '../pages/login/login';
+import { RegisterPage } from '../pages/register/register';
 import { AccountPage } from '../pages/account/account';
 import { CartModalPage } from '../pages/cart-modal/cart-modal';
 import { CardModalPage } from '../pages/card-modal/card-modal';
@@ -43,6 +44,7 @@ let config = {
     HomePage,
     DashPage,
     LoginPage,
+    RegisterPage,
     AccountPage,
     CartModalPage,
     CardModalPage
@@ -64,6 +66,7 @@ let config = {
     HomePage,
     DashPage,
     LoginPage,
+    RegisterPage,
     AccountPage,
     CartModalPage,
     CardModalPage

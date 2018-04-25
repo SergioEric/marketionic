@@ -103,7 +103,6 @@ export class HomePage {
     // }, 3000);
       storage.get('username').then(val=>{
         if(val){
-          debugger;
           this.displayName = val
         }else{
           if(this.authService.authState){
@@ -244,7 +243,7 @@ export class HomePage {
     if(this.cartList.length == 0) return;
     this.cartList.map(v=>{
       // debugger;
-      ids+=`${v} \n`;
+      ids+=`${v.p.id} \n`;
     })
     alert(ids)
   }
